@@ -39,12 +39,10 @@ exports.uploadEX = async (req, res) => {
 
     const skylink = await client.uploadFile('./uploads/test.json');
 
-    console.log(213)
-    console.log(skylink)
-    // res.send(`Upload successful, skylink: ${skylink}`);
+    res.send(`Upload successful, skylink: ${skylink}`);
 
   } catch (err) {
     console.error(err)
-    // res.status(404).send(err);
+    res.status(404).send(err);
   }
 };
