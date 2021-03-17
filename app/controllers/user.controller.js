@@ -1,7 +1,7 @@
 const fs = require('fs');
 const { SkynetClient } = require('@nebulous/skynet');
 
-const client = new SkynetClient("https://sialoop.net/");
+const client = new SkynetClient();
 
 exports.uploadIM = async (req, res) => {
   const file = req.files.file;
