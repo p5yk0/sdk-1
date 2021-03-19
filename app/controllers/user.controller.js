@@ -24,7 +24,6 @@ exports.uploadEX = async (req, res) => {
 
   try {
 
-    console.log(typeof media)
     const stream = await got.stream(media);
 
     const extention = await FileType.fromStream(stream); 
