@@ -1,4 +1,5 @@
 const fs = require('fs');
+const got = require('got');
 const FileType = require('file-type');
 const { SkynetClient } = require('@nebulous/skynet');
 
@@ -23,7 +24,10 @@ exports.uploadEX = async (req, res) => {
 
   try {
 
-    const extention = await FileType.fromFile(media); 
+    console.log(typeof media)
+    const stream = await got.stream(media);
+
+    const extention = await FileType.fromStream(stream); 
 
     let modifiedData = {
       internalId,
@@ -46,6 +50,7 @@ exports.uploadEX = async (req, res) => {
 
     res.json({ file: `https://siasky.net/${skylink.substring(6)}` });
   } catch (err) {
-    res.status(404).send(err);
+    console.log(err)
+    res.status(404).send(err.message);
   }
 };
