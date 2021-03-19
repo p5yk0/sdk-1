@@ -1,4 +1,5 @@
 const fs = require('fs');
+const FileType = require('file-type');
 const { SkynetClient } = require('@nebulous/skynet');
 
 const client = new SkynetClient();
@@ -6,10 +7,10 @@ const client = new SkynetClient();
 exports.uploadIM = async (req, res) => {
   const file = req.files.file;
   file.mv('./uploads/' + file.name, async function(err, result) {
-    if(err) { throw err; }
+    if(err) { throw err }
     try {
       const skylink = await client.uploadFile('./uploads/' + file.name);
-      res.send(`Upload successful, skylink: ${skylink}`);
+      res.json({ file: `https://siasky.net/${skylink.substring(6)}` });
     } catch (err) {
       res.status(404).send(err);
     }
@@ -17,32 +18,34 @@ exports.uploadIM = async (req, res) => {
 };
 
 exports.uploadEX = async (req, res) => {
+
   const { internalId, name, descripion, media, cryptedMedia } = req.body;
 
-  let modifiedData = {
-    internalId,
-    name,
-    descripion,
-    media: {
-      type: "image/png",
-      url: media,
-      height: 250,
-      width: 250
-    },
-    cryptedMedia: {
-      url: cryptedMedia,
-    }
-  }
-
   try {
+
+    const extention = await FileType.fromFile(media); 
+
+    let modifiedData = {
+      internalId,
+      name,
+      descripion,
+      media: {
+        type: extention.mime,
+        url: media,
+        height: 250,
+        width: 250
+      },
+      cryptedMedia: {
+        url: cryptedMedia,
+      }
+    }
+
     fs.writeFileSync('./uploads/test.json', JSON.stringify(modifiedData));
 
     const skylink = await client.uploadFile('./uploads/test.json');
 
-    res.send(`Upload successful, skylink: ${skylink}`);
-
+    res.json({ file: `https://siasky.net/${skylink.substring(6)}` });
   } catch (err) {
-    console.error(err)
     res.status(404).send(err);
   }
 };
