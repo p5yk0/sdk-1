@@ -12,4 +12,14 @@ module.exports = function(app) {
   app.post("/api/uploadIM", controller.uploadIM);
 
   app.post("/api/uploadEX", controller.uploadEX);
+
+  app.get("/api/mnemonicGenerate", controller.mnemonicGenerate);
+
+  app.get("/api/generateKey", controller.generateKey);
+
+  app.post("/api/cryptFile", controller.cryptFile);
+
+  app.post("/api/createNFT", controller.createNft);
+
+
 };
