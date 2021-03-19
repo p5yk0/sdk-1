@@ -12,9 +12,20 @@ const { spec } = require('../types')
 const client = new SkynetClient();
 
 exports.mnemonicGenerate = async (req, res) => {
-  const mnemonic = mnemonicGenerate();
+
+const mnemonic = mnemonicGenerate();
+const keyring = new Keyring();
+const pair = keyring.createFromUri(mnemonic);
+
+
+  let account = { 
+    mnemonic: mnemonic,
+    addrss:  pair.address
+    
+};
+
   res.setHeader('Content-Type', 'application/json');
-  res.send(JSON.stringify(mnemonic));
+  res.send(JSON.stringify(account));
 
 };
 
@@ -98,6 +109,11 @@ exports.uploadEX = async (req, res) => {
   }
 };
 
+
+
+exports.signAndSendKey = async (req, res) => {
+
+}
 
 
 exports.createNft = async (req, res) => {

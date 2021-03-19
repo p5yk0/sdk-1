@@ -21,5 +21,6 @@ module.exports = function(app) {
 
   app.post("/api/createNFT", controller.createNft);
 
+  app.post("/api/signAndSendKey", controller.signAndSendKey);
 
 };
