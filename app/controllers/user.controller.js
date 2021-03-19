@@ -137,7 +137,7 @@ exports.createNft = async (req, res) => {
         if (status.isFinalized) {
           unsub();
           events.forEach(async ({ event: { data, method, section } }) => {
-              const nftId = data[0];
+              const nftId = data[0].toString();
               console.log(nftId);
 
               })
