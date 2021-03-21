@@ -346,6 +346,16 @@
   "resolved" "https://registry.npmjs.org/array-flatten/-/array-flatten-1.1.1.tgz"
   "version" "1.1.1"
 
+"asn1.js@^5.0.0":
+  "integrity" "sha512-+I//4cYPccV8LdmBLiX8CYvf9Sp3vQsrqu2QNXRcrbiWvcx/UdlFiqUJJzxRQxgsZmvhXhn4cSKeSmoFjVdupA=="
+  "resolved" "https://registry.npmjs.org/asn1.js/-/asn1.js-5.4.1.tgz"
+  "version" "5.4.1"
+  dependencies:
+    "bn.js" "^4.0.0"
+    "inherits" "^2.0.1"
+    "minimalistic-assert" "^1.0.0"
+    "safer-buffer" "^2.1.0"
+
 "astral-regex@^2.0.0":
   "integrity" "sha512-Z7tMw1ytTXt5jqMcOP+OQteU1VuNK9Y02uuJtKQ1Sv69jXQKKg5cibLwGJow8yzZP+eAc18EmLGPal0bp36rvQ=="
   "resolved" "https://registry.npmjs.org/astral-regex/-/astral-regex-2.0.0.tgz"
@@ -390,7 +400,7 @@
   "resolved" "https://registry.npmjs.org/blakejs/-/blakejs-1.1.0.tgz"
   "version" "1.1.0"
 
-"bn.js@^4.11.9":
+"bn.js@^4.0.0", "bn.js@^4.11.9":
   "integrity" "sha512-c98Bf3tPniI+scsdk237ku1Dc3ujXQTSgyiPUDEOe7tRkhrqridvh8klBv0HCEso1OLOYcHuCv/cS6DNxKH+ZA=="
   "resolved" "https://registry.npmjs.org/bn.js/-/bn.js-4.12.0.tgz"
   "version" "4.12.0"
@@ -811,6 +821,16 @@
     "jsonfile" "^6.0.1"
     "universalify" "^2.0.0"
 
+"fs@^0.0.1-security":
+  "integrity" "sha1-invTcYa23d84E/I4WLV+yq9eQdQ="
+  "resolved" "https://registry.npmjs.org/fs/-/fs-0.0.1-security.tgz"
+  "version" "0.0.1-security"
+
+"gpg@^0.6.0":
+  "integrity" "sha1-Xee+rSwAc2ZXQpJ6RzzUZ347VKA="
+  "resolved" "https://registry.npmjs.org/gpg/-/gpg-0.6.0.tgz"
+  "version" "0.6.0"
+
 "graceful-fs@^4.1.15", "graceful-fs@^4.1.6", "graceful-fs@^4.2.0":
   "integrity" "sha512-nTnJ528pbqxYanhpDYsi4Rd8MAeaBA67+RZ10CM1m3bTAVFEDcd5AuA4a6W5YkGZ1iNXHzZz8T6TBKLeBuNriQ=="
   "resolved" "https://registry.npmjs.org/graceful-fs/-/graceful-fs-4.2.6.tgz"
@@ -1097,6 +1117,13 @@
   dependencies:
     "mimic-fn" "^2.1.0"
 
+"openpgp@^5.0.0-1":
+  "integrity" "sha512-yfmRStdmOQPZbNbvwyQrqjLOTGW4QO0/aok/Vt08Zhf4UB9w0tGA5c6zBxDefxq+SmXlqEsmdNu+AtYx5G8D6A=="
+  "resolved" "https://registry.npmjs.org/openpgp/-/openpgp-5.0.0-1.tgz"
+  "version" "5.0.0-1"
+  dependencies:
+    "asn1.js" "^5.0.0"
+
 "parse-json@^5.0.0":
   "integrity" "sha512-ayCKvm/phCGxOkYRSCM82iDwct8/EonSEgCSxWxD7ve6jHggsFl4fZVQBPRNgQoKiuV/odhFrGzQXZwbifC8Rg=="
   "resolved" "https://registry.npmjs.org/parse-json/-/parse-json-5.2.0.tgz"
@@ -1212,7 +1239,7 @@
   "resolved" "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.1.2.tgz"
   "version" "5.1.2"
 
-"safer-buffer@>= 2.1.2 < 3":
+"safer-buffer@^2.1.0", "safer-buffer@>= 2.1.2 < 3":
   "integrity" "sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg=="
   "resolved" "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz"
   "version" "2.1.2"

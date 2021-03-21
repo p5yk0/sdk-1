@@ -9,6 +9,7 @@ const { ApiPromise, WsProvider } = require('@polkadot/api');
 const ENDPOINT = 'wss://chaos.ternoa.com';
 const { spec } = require('../types')
 const client = new SkynetClient();
+const openpgp = require("openpgp");
 
 const isValidSignature = (signedMessage, signature, address) => {
   const publicKey = decodeAddress(address);
@@ -30,16 +31,6 @@ exports.mnemonicGenerate = async (req, res) => {
 
   };
   
-  /*
-  const isValid = isValidSignature(
-    'manger',
-    '0x800628fa0e3b23d39863c9d9f8cd9fdad64847e007908297fc9f3620c754416f40ef8ca0329b9b19c93a6197311e55a49f4e47fa84b6a95cde536df9e27ab988',
-    '5HosFh3chaShbZwjR9xUTUXaUCNRj9DRo4774JXe83hTimp1'
-  );
-  console.log(isValid)
-  
-  */
-
   res.setHeader('Content-Type', 'application/json');
   res.send(JSON.stringify(account));
 
@@ -165,25 +156,45 @@ exports.createNft = async (req, res) => {
 
 exports.signPasswordRequest = async (req, res) => {
 
-  const { nftid } = req.body;
 
   async function main() {
-    
+    const { nftId } = req.body;
+
     await cryptoWaitReady();
 
+    /* Generate signature  */
     const keyring = new Keyring({ type: 'sr25519' });
     const user = await keyring.addFromUri(process.env.mnemonic);
-    const message = stringToU8a(nftid);
+    const message = stringToU8a(nftId);
     const signature = user.sign(message);
 
+    /* Prepare request for SGX */ 
     let result = {
-      nftId:nftid,
+      nftId: nftId,
       signature: u8aToHex(signature),
-      address: user.address
+      address: user.address,
+      key: process.env.key
     };
 
+    /* Crypt and send to SGX */
+    console.log(JSON.stringify(result));
+    require.extensions['.txt'] = function (module, filename) {
+      module.exports = fs.readFileSync(filename, 'utf8');
+    };
+    
+    var words = require("../../keys/public.txt");
+    
+    const publicKey = await openpgp.readKey({ armoredKey: words });
+    const encrypted = await openpgp.encrypt({
+      message: openpgp.Message.fromText(result), // input as Message object
+      publicKeys: publicKey
+  });
+
+  let protectedRequest = encrypted;
+
+
     res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify(result));
+    res.send(JSON.stringify(protectedRequest));
   
   }
   main();
