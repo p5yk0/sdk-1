@@ -7,22 +7,22 @@ Grand CAPS (test Coin)
 
 
 Getting your menomonic wallet
-GET http://127.0.0.1:3004/api/mnemonicGenerate
+GET http://127.0.0.1:3000/api/mnemonicGenerate
 
 generate key crypto
-GET http://127.0.0.1:3004/api/generateKey
+GET http://127.0.0.1:3000/api/generateKey
 
 upload file
-POST http://127.0.0.1:3004/api/uploadIM
+POST http://127.0.0.1:3000/api/uploadIM
 
 crypt and upload secret 
-POST http://127.0.0.1:3004/api/cryptFile
+POST http://127.0.0.1:3000/api/cryptFile
 
 Generate NFT
-POST http://127.0.0.1:3004/api/uploadEx
+POST http://127.0.0.1:3000/api/uploadEx
 
 Create NFT
-POST http://127.0.0.1:3004/api/createNFT
+POST http://127.0.0.1:3000/api/createNFT
 
 Sign NFT owneshit
 
