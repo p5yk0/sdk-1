@@ -1,4 +1,4 @@
-const controller = require("../controllers/user.controller");
+const controller = require("../controllers/general.controller");
 
 module.exports = function (app) {
   app.use(function (req, res, next) {
@@ -40,10 +40,7 @@ module.exports = function (app) {
   app.post("/api/createNFT", controller.createNft);
 
   /*
-  Generate Sign and details for SGX enclave
+  Generate Signature and crypt for SGX enclave
   */
- 
   app.post("/api/signPasswordRequest", controller.signPasswordRequest);
-
-
 };
