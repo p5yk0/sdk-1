@@ -1,7 +1,7 @@
 //General libraries
 const fs = require('fs');
 const { exit } = require('process');
-const encrypt = require('node-file-encrypt');
+//const encrypt = require('node-file-encrypt');
 const openpgp = require("openpgp");
 //Polkadot libraries
 const { ApiPromise, WsProvider } = require('@polkadot/api');
