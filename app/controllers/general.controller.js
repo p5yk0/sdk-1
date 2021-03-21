@@ -15,6 +15,7 @@ const client = new SkynetClient();
 const { spec } = require('../types')
 const ENDPOINT = 'wss://chaos.ternoa.com';
 
+
 exports.mnemonicGenerate = async (req, res) => {
 
   const keyring = new Keyring({ type: 'sr25519' });
