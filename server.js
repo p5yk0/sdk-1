@@ -1,4 +1,3 @@
-
 const express = require('express');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
@@ -6,18 +5,6 @@ const fileUpload = require('express-fileupload');
 require('dotenv').config();
 
 const app = express();
-
-
-
-(async () => {
-
-
-
-})();
-
-
-
-
 
 app.use(cors());
 app.use(express.json());

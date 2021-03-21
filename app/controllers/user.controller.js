@@ -1,15 +1,20 @@
+//General libraries
 const fs = require('fs');
-const { SkynetClient } = require('@nebulous/skynet');
-const { stringToU8a, u8aToHex, u8aToString } = require('@polkadot/util');
-const { signatureVerify, encodeAddress, cryptoWaitReady, decodeAddress, mnemonicGenerate, mnemonicToMiniSecret, mnemonicValidate, naclEncrypt, naclKeypairFromSeed, blake2AsHex, randomAsU8a, naclSign } = require('@polkadot/util-crypto');
-const { Keyring } = require('@polkadot/keyring');
 const { exit } = require('process');
 const encrypt = require('node-file-encrypt');
-const { ApiPromise, WsProvider } = require('@polkadot/api');
-const ENDPOINT = 'wss://chaos.ternoa.com';
-const { spec } = require('../types')
-const client = new SkynetClient();
 const openpgp = require("openpgp");
+//Polkadot libraries
+const { ApiPromise, WsProvider } = require('@polkadot/api');
+const { stringToU8a, u8aToHex} = require('@polkadot/util');
+const { signatureVerify,  cryptoWaitReady, decodeAddress, mnemonicGenerate, blake2AsHex } = require('@polkadot/util-crypto');
+const { Keyring } = require('@polkadot/keyring');
+//Sia libraries
+const { SkynetClient } = require('@nebulous/skynet');
+const client = new SkynetClient();
+//Ternoa libraries
+const { spec } = require('../types')
+const ENDPOINT = 'wss://chaos.ternoa.com';
+
 
 const isValidSignature = (signedMessage, signature, address) => {
   const publicKey = decodeAddress(address);
@@ -24,13 +29,12 @@ exports.mnemonicGenerate = async (req, res) => {
   const mnemonic = mnemonicGenerate();
   const newAccount = await keyring.addFromUri(mnemonic);
 
-
   let account = {
     mnemonic: mnemonic,
     address: newAccount.address,
 
   };
-  
+
   res.setHeader('Content-Type', 'application/json');
   res.send(JSON.stringify(account));
 
@@ -168,7 +172,7 @@ exports.signPasswordRequest = async (req, res) => {
     const message = stringToU8a(nftId);
     const signature = user.sign(message);
 
-    /* Prepare request for SGX */ 
+    /* Prepare request for SGX */
     let result = {
       nftId: nftId,
       signature: u8aToHex(signature),
@@ -181,21 +185,21 @@ exports.signPasswordRequest = async (req, res) => {
     require.extensions['.txt'] = function (module, filename) {
       module.exports = fs.readFileSync(filename, 'utf8');
     };
-    
+
     var words = require("../../keys/public.txt");
-    
+
     const publicKey = await openpgp.readKey({ armoredKey: words });
     const encrypted = await openpgp.encrypt({
       message: openpgp.Message.fromText(result), // input as Message object
       publicKeys: publicKey
-  });
+    });
 
-  let protectedRequest = encrypted;
+    let protectedRequest = encrypted;
 
-
+    /*Return Crypted sign and password request for NFT*/ 
     res.setHeader('Content-Type', 'application/json');
     res.send(JSON.stringify(protectedRequest));
-  
+
   }
   main();
 }
