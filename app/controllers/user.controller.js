@@ -160,11 +160,10 @@ exports.createNft = async (req, res) => {
   }
   main();
 
-
 };
 
 
-exports.signAndSendKey = async (req, res) => {
+exports.signPasswordRequest = async (req, res) => {
 
   const { nftid } = req.body;
 
@@ -180,13 +179,13 @@ exports.signAndSendKey = async (req, res) => {
     let result = {
       nftId:nftid,
       signature: u8aToHex(signature),
-      address: user.address,
-  
+      address: user.address
     };
-    
+
     res.setHeader('Content-Type', 'application/json');
     res.send(JSON.stringify(result));
   
   }
   main();
 }
+
