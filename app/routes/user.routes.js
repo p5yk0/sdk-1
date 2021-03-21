@@ -14,10 +14,12 @@ module.exports = function (app) {
   */
   app.get("/api/mnemonicGenerate", controller.mnemonicGenerate);
 
+  
   /*
   Generate key for protect Secret
   */
   app.get("/api/generateKey", controller.generateKey);
+
 
   /*
   Protect file using key
