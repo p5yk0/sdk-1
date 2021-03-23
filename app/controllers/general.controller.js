@@ -113,7 +113,7 @@ exports.cryptFile = async (req, res) => {
     const { privateKeyArmored, publicKeyArmored, revocationCertificate } = await openpgp.generateKey({
       type: 'ecc',
       curve: 'curve25519',
-      userIds: [{ name: 'Mickaël Canu', email: 'contact@netick.fr' }],
+      userIds: [{ name: 'yourname', email: 'johndoe@ternoa.com' }],
       passphrase: hash
     });
 
