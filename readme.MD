@@ -49,34 +49,53 @@ curl --request POST \
 }
 ```
 ### Create your NFT
-Get NFT design normal and secret
+Using Previously uploaded files, generate your NFT
+```
+curl --request POST \
+  --url http://127.0.0.1:3000/api/uploadEX \
+  --header 'Content-Type: application/json' \
+  --data '{
+	"internalid":"18",
+	"name":"Yippee Ki Yay",
+	"description":"Yippee Ki Yay from France",
+        "media":"https://siasky.net/NADj2RoH6l_YVKKN7YrsSHYlimHP-qDQdf3uQrAAZvKeQA",
+        "cryptedMedia":"https://siasky.net/NACIeWPwD9LSzB7ievDeaVQMN-NdGYX5xfXWdiAemBhNdA"
+        }'
+```
+
+**Result**
+
+```
+{
+  "file": "https://siasky.net/AAAKYhYQ1R6PwULeslCcsf5c3TGJdxboe9LUAjX5IPIB3w"
+}
+```
 
 
-Grand CAPS (test Coin)
+### Claim Free tokens
+In order to try our blockchain, you should claim free Tokens.
+> ⚠️ Faucet is now only available for Ternoa's developers. Feel free to ask tokens on our Discord for get test tokens.
 
 
-Getting your menomonic wallet
-GET http://127.0.0.1:3000/api/mnemonicGenerate
+### Create NFT on Ternoa Chain
+Now your NFT is ready to deploy on Ternoa chain's. 
+```
+curl --request POST \
+  --url http://127.0.0.1:3000/api/createNFT \
+  --header 'Content-Type: application/json' \
+  --data '{
+	"nftUrl":"https://siasky.net/AAAKYhYQ1R6PwULeslCcsf5c3TGJdxboe9LUAjX5IPIB3w"
+        }'
+	
+```
+On Ternoa Chaos Net, you can follow the NFT creating event.
 
-generate key crypto
-GET http://127.0.0.1:3000/api/generateKey
+![](https://i.imgur.com/z1qo7ZT.png)
+![](https://i.imgur.com/46dMysM.png)
 
-upload file
-POST http://127.0.0.1:3000/api/uploadIM
+### Sign NFT ownership and Send it to NoChain (SGX)
+> ⚠️ In progress
 
-crypt and upload secret 
-POST http://127.0.0.1:3000/api/cryptFile
-
-Generate NFT
-POST http://127.0.0.1:3000/api/uploadEx
-
-Create NFT
-POST http://127.0.0.1:3000/api/createNFT
-
-Sign NFT owneshit
-
-
-Send Key to NoChain
 
 
 ## MARKETPLACE

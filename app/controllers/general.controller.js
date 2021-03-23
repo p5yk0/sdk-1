@@ -176,7 +176,7 @@ exports.uploadEX = async (req, res) => {
     /* generate and upload Json file */
     const skylink = await client.uploadFile('./uploads/test.json');
 
-    res.send(`Upload successful, skylink: ${skylink}`);
+    res.json({ file: `https://siasky.net/${skylink.substring(6)}` });
 
   } catch (err) {
     console.error(err)
