@@ -102,7 +102,6 @@ exports.cryptFile = async (req, res) => {
     let filePath = './uploads/' + file.name; // source file path
 
     /* Generate Strong Key for NFT */
-
     var result = '';
     var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var charactersLength = characters.length;
@@ -121,7 +120,6 @@ exports.cryptFile = async (req, res) => {
 
     /*Safe encrypted NFT keys*/ 
     var hashFile = await getChecksum(filePath);
-
     fs.writeFileSync('./nftkeys/' + hashFile + '_privatekey.key', privateKeyArmored);
     fs.writeFileSync('./nftkeys/' + hashFile + '_publickey.key', publicKeyArmored);
     fs.writeFileSync('./nftkeys/' + hashFile + '_revokekey.key', revocationCertificate);
@@ -130,7 +128,6 @@ exports.cryptFile = async (req, res) => {
 
     /*Encrypt file*/ 
     const fileForOpenpgpjs = new Uint8Array(req.files.file.data);
-
     const encryptionResponse = await openpgp.encrypt({
       message: openpgp.Message.fromBinary(fileForOpenpgpjs),
       publicKeys: (await openpgp.readKey({ armoredKey: publicKeyArmored })),
