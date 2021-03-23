@@ -1,7 +1,20 @@
-# POC NODE
-## Create a secret NFT
+# SDK1  - NFT
+## Create and upload NFT to Ternoa's Marketplace
+Bellow all steps for create your NFT and upload to Ternoa's Market place.
+### Generate Mnemonic
+First, generate your mnemonic phrase and retreive you public address. 
+```
+GET https://ternoa-sdk.herokuapp.com/api/mnemonicGenerate
+```
+**Result**
+```
+{"mnemonic":"observe injury wasp verify found dream addict leaf produce section royal trim","address":"5FmvpY1zJQC4wDXi1L5yqjZL5VkVtiJb7XhHcPBRpSSytFcv"}
+```
+### Generate Mnemonic
+
 ### Create your NFT
 Get NFT design normal and secret
+
 
 Grand CAPS (test Coin)
 
