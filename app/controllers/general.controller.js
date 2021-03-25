@@ -3,17 +3,22 @@ const fs = require('fs');
 const { exit } = require('process');
 const openpgp = require("openpgp");
 var AdmZip = require('adm-zip');
+const axios = require('axios')
+
 //Polkadot libraries
 const { ApiPromise, WsProvider } = require('@polkadot/api');
 const { stringToU8a, u8aToHex } = require('@polkadot/util');
 const { signatureVerify, cryptoWaitReady, decodeAddress, mnemonicGenerate, blake2AsHex, naclEncrypt } = require('@polkadot/util-crypto');
 const { Keyring } = require('@polkadot/keyring');
+
 //Sia libraries
 const { SkynetClient } = require('@nebulous/skynet');
 const client = new SkynetClient();
+
 //Ternoa libraries
 const { spec } = require('../types')
 const ENDPOINT = 'wss://chaos.ternoa.com';
+
 //Crypto libraries
 const crypto = require('crypto');
 const algorithm = 'aes-256-cbc';
@@ -25,9 +30,7 @@ const key = crypto.scryptSync(password, salt, keyLength);
 
 function getChecksum(path) {
   return new Promise(function (resolve, reject) {
-    // crypto.createHash('sha1');
-    // crypto.createHash('sha256');
-    const hash = crypto.createHash('md5');
+    const hash = crypto.createHash('sha256');
     const input = fs.createReadStream(path);
 
     input.on('error', reject);
@@ -41,6 +44,8 @@ function getChecksum(path) {
     });
   });
 }
+
+
 
 exports.mnemonicGenerate = async (req, res) => {
 
@@ -117,7 +122,7 @@ exports.cryptFile = async (req, res) => {
       passphrase: hash
     });
 
-    /*Safe encrypted NFT keys*/ 
+    /*Safe encrypted NFT keys*/
     var hashFile = await getChecksum(filePath);
     fs.writeFileSync('./nftkeys/' + hashFile + '_privatekey.key', privateKeyArmored);
     fs.writeFileSync('./nftkeys/' + hashFile + '_publickey.key', publicKeyArmored);
@@ -125,7 +130,7 @@ exports.cryptFile = async (req, res) => {
     fs.writeFileSync('./txtkeys/' + hashFile + '.text', hash);
 
 
-    /*Encrypt file*/ 
+    /*Encrypt file*/
     const fileForOpenpgpjs = new Uint8Array(req.files.file.data);
     const encryptionResponse = await openpgp.encrypt({
       message: openpgp.Message.fromBinary(fileForOpenpgpjs),
@@ -142,12 +147,12 @@ exports.cryptFile = async (req, res) => {
     var zip = new AdmZip();
     zip.addLocalFile(filePath + '.ternoa');
     var willSendthis = zip.toBuffer();
-    zip.writeZip(filePath + '-'+hashFile+'.ternoa.zip');
+    zip.writeZip(filePath + '-' + hashFile + '.ternoa.zip');
     try {
 
       /* Upload image to SIA */
-      const skylink = await client.uploadFile(filePath + '-'+hashFile+'.ternoa.zip');
-    res.json({ file: `https://siasky.net/${skylink.substring(6)}` });
+      const skylink = await client.uploadFile(filePath + '-' + hashFile + '.ternoa.zip');
+      res.json({ file: `https://siasky.net/${skylink.substring(6)}` });
     } catch (err) {
       res.status(404).send(err);
     }
@@ -184,9 +189,6 @@ exports.uploadEX = async (req, res) => {
   }
 };
 
-
-
-
 exports.createNft = async (req, res) => {
 
   /*Method for create NFT using Mnemonic*/
@@ -217,7 +219,64 @@ exports.createNft = async (req, res) => {
         }
 
       })
+
   }
+  main();
+
+};
+
+exports.listNft = async (req, res) => {
+
+  const { nftId, price } = req.body;
+
+  async function main() {
+    await cryptoWaitReady();
+
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 2 });
+    const user = keyring.addFromMnemonic((process.env.mnemonic));
+
+    const wsProvider = new WsProvider(ENDPOINT);
+    const api = await ApiPromise.create({ provider: wsProvider, types: spec });
+    const unsub = await api.tx.marketplace
+      .list(
+          nftId,
+          price
+      )
+      .signAndSend(user, async ({ events = [], status }) => {
+
+        if (status.isFinalized) {
+          unsub();
+          res.send(nftId, price);
+        }
+
+      })
+  }
+  main();
+
+};
+
+exports.sellNFT = async (req, res) => {
+
+  const { nftId } = req.body;
+
+  async function main() {
+
+    await cryptoWaitReady();
+
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 2 });
+    const user = keyring.addFromMnemonic((process.env.mnemonic));
+
+    const wsProvider = new WsProvider(ENDPOINT);
+    const api = await ApiPromise.create({ provider: wsProvider, types: spec });
+    await api.tx.marketplace.list(Number(nftId), 10).signAndSend(user, async ({ events = [], status }) => {
+      events.forEach(async ({ event: { data, method, section } }) => {
+        res.send(JSON.stringify(data));
+
+      });
+    })
+
+  }
+
   main();
 
 };
@@ -226,43 +285,80 @@ exports.createNft = async (req, res) => {
 exports.signPasswordRequest = async (req, res) => {
 
   async function main() {
-    const { nftId } = req.body;
+    const { nftId, hash } = req.body;
+
 
     await cryptoWaitReady();
 
-    /* Generate signature  */
+    /* Connect to Wallet */
     const keyring = new Keyring({ type: 'sr25519' });
     const user = await keyring.addFromUri(process.env.mnemonic);
-    const message = stringToU8a(nftId);
-    const signature = user.sign(message);
 
-    /* Prepare request for SGX */
-    let result = {
-      nftId: nftId,
-      signature: u8aToHex(signature),
-      address: user.address,
-      key: process.env.key
-    };
-
-    /* Crypt and send to SGX */
-    console.log(JSON.stringify(result));
-    require.extensions['.txt'] = function (module, filename) {
-      module.exports = fs.readFileSync(filename, 'utf8');
-    };
-
-    var words = require("../../keys/public.txt");
-
-    const publicKey = await openpgp.readKey({ armoredKey: words });
-    const encrypted = await openpgp.encrypt({
-      message: openpgp.Message.fromText(result), // input as Message object
-      publicKeys: publicKey
+    /*Encrypt NFT secret using NGX public KEY*/
+    const fileForOpenpgpjs = new Uint8Array("./nftkeys/" + hash + "_privatekey.key");
+    const publicKeyArmored = fs.readFileSync('./keys/public.txt');
+    const encryptionResponse = await openpgp.encrypt({
+      message: openpgp.Message.fromBinary(fileForOpenpgpjs),
+      publicKeys: (await openpgp.readKey({ armoredKey: publicKeyArmored })),
     });
 
-    let protectedRequest = encrypted;
+    const reader = openpgp.stream.getReader(encryptionResponse);
+    const { value } = await reader.read();
+    fs.writeFileSync("./tosgx/" + hash + '_privatekey.key.ternoa', value);
 
-    /*Return Crypted sign and password request for NFT*/
-    res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify(protectedRequest));
+    /*Encrypt privatekey password using NGX public KEY*/
+    const fileForOpenpgpjs_key = new Uint8Array("./txtkeys/" + hash + ".text");
+    const publicKeyArmored_key = fs.readFileSync('./keys/public.txt');
+    const encryptionResponse_key = await openpgp.encrypt({
+      message: openpgp.Message.fromBinary(fileForOpenpgpjs_key),
+      publicKeys: (await openpgp.readKey({ armoredKey: publicKeyArmored_key })),
+    });
+
+    const reader_key = openpgp.stream.getReader(encryptionResponse_key);
+    const { value_key } = await reader_key.read();
+    fs.writeFileSync("./tosgx/" + hash + '.text.ternoa', value_key);
+
+    /* zip Both of files */
+    var zip = new AdmZip();
+    zip.addLocalFile("./tosgx/" + hash + '.text.ternoa', value_key);
+    zip.addLocalFile("./tosgx/" + hash + '_privatekey.key.ternoa', value_key);
+    var willSendthis = zip.toBuffer();
+    zip.writeZip("./tosgx/" + hash + '.zip');
+
+    /* generate Hash of file*/
+    var hashZip = await getChecksum("./tosgx/" + hash + ".zip");
+
+    /* upload zip file to sia*/
+    const skylink = await client.uploadFile("./tosgx/" + hash + ".zip");
+
+    console.log(`https://siasky.net/${skylink.substring(6)}`);
+
+    /* Generate signature  */
+    const message = stringToU8a(nftId + '_' + hashZip + '_' + process.env.address);
+    console.log(nftId + '_' + hashZip + '_' + process.env.address);
+    const signature = user.sign(message);
+    console.log(u8aToHex(signature));
+
+
+    /* Send request for SGX */
+
+    axios
+      .post('https://sgx.ternoa.com/deposit', {
+        signature: u8aToHex(signature),
+        data: nftId + '_' + hashZip + '_' + process.env.address,
+        zip: `https://siasky.net/${skylink.substring(6)}`
+
+      })
+
+      .then(res => {
+        console.log(`statusCode: ${res.statusCode}`)
+        res.send(JSON.stringify("ok"));
+      })
+      .catch(error => {
+        //to change when NGX deployed
+        res.send(JSON.stringify("ok"));
+      })
+
 
   }
   main();

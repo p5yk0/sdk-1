@@ -14,7 +14,7 @@ module.exports = function (app) {
   */
   app.get("/api/mnemonicGenerate", controller.mnemonicGenerate);
 
-  
+
   /*
   Generate key for protect Secret
   */
@@ -25,21 +25,31 @@ module.exports = function (app) {
   Protect file using key
   */
   app.post("/api/cryptFile", controller.cryptFile);
- 
-  /* 
-  Upload images to SIA server 
+
+  /*
+  Upload images to SIA server
   */
   app.post("/api/uploadIM", controller.uploadIM);
 
-  /* 
-  Upload JSON file to SIA server 
+  /*
+  Upload JSON file to SIA server
   */
   app.post("/api/uploadEX", controller.uploadEX);
 
-  /* 
+  /*
   Upload NFT to TERNOA chain
   */
   app.post("/api/createNFT", controller.createNft);
+
+  /*
+  List NFT on marketplace
+  */
+  app.post("/api/listNFT", controller.listNft);
+
+  /*
+  Sell NFT to TERNOA Market Place
+  */
+  app.post("/api/sellNFT", controller.sellNFT);
 
   /*
   Generate Signature and crypt for SGX enclave
