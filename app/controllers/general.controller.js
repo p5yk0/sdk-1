@@ -219,7 +219,34 @@ exports.createNft = async (req, res) => {
         }
 
       })
+
   }
+  main();
+
+};
+
+exports.sellNFT = async (req, res) => {
+
+  const { nftId } = req.body;
+
+  async function main() {
+
+    await cryptoWaitReady();
+
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 2 });
+    const user = keyring.addFromMnemonic((process.env.mnemonic));
+
+    const wsProvider = new WsProvider(ENDPOINT);
+    const api = await ApiPromise.create({ provider: wsProvider, types: spec });
+    await api.tx.marketplace.list(Number(nftId), 10).signAndSend(user, async ({ events = [], status }) => {
+      events.forEach(async ({ event: { data, method, section } }) => {
+        res.send(JSON.stringify(data));
+
+      });
+    })
+
+  }
+
   main();
 
 };

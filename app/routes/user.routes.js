@@ -40,6 +40,11 @@ module.exports = function (app) {
   Upload NFT to TERNOA chain
   */
   app.post("/api/createNFT", controller.createNft);
+  
+  /* 
+  Sell NFT to TERNOA Market Place
+  */
+  app.post("/api/sellNFT", controller.sellNFT);
 
   /*
   Generate Signature and crypt for SGX enclave
