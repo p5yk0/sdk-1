@@ -94,8 +94,15 @@ On Ternoa Chaos Net, you can follow the NFT creating event.
 ![](https://i.imgur.com/46dMysM.png)
 
 ### Sign NFT ownership and Send it to NoChain (SGX)
-> ⚠️ In progress
-
-
+Prepare and send to SGX crypted && signed data 
+```
+curl --request POST \
+  --url http://127.0.0.1:3000/api/signPasswordRequest \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "nftId": "36",
+  "hash": "5dae77e26da1c563fdff7e8706fd552d"
+}'
+```
 
 ## MARKETPLACE

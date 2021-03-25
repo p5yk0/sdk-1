@@ -204,6 +204,7 @@ exports.createNft = async (req, res) => {
     const api = await ApiPromise.create({ provider: wsProvider, types: spec });
     const unsub = await api.tx.nfts
       .create({
+        
         offchain_uri: nftUrl,
       })
       .signAndSend(user, async ({ events = [], status }) => {
@@ -225,35 +226,6 @@ exports.createNft = async (req, res) => {
 
 };
 
-exports.listNft = async (req, res) => {
-
-  const { nftId, price } = req.body;
-
-  async function main() {
-    await cryptoWaitReady();
-
-    const keyring = new Keyring({ type: 'sr25519', ss58Format: 2 });
-    const user = keyring.addFromMnemonic((process.env.mnemonic));
-
-    const wsProvider = new WsProvider(ENDPOINT);
-    const api = await ApiPromise.create({ provider: wsProvider, types: spec });
-    const unsub = await api.tx.marketplace
-      .list(
-          nftId,
-          price
-      )
-      .signAndSend(user, async ({ events = [], status }) => {
-
-        if (status.isFinalized) {
-          unsub();
-          res.send(nftId, price);
-        }
-
-      })
-  }
-  main();
-
-};
 
 exports.sellNFT = async (req, res) => {
 
@@ -268,7 +240,7 @@ exports.sellNFT = async (req, res) => {
 
     const wsProvider = new WsProvider(ENDPOINT);
     const api = await ApiPromise.create({ provider: wsProvider, types: spec });
-    await api.tx.marketplace.list(Number(nftId), 10).signAndSend(user, async ({ events = [], status }) => {
+    await api.tx.marketplace.list(Number(nftId), "1000000000000000000").signAndSend(user, async ({ events = [], status }) => {
       events.forEach(async ({ event: { data, method, section } }) => {
         res.send(JSON.stringify(data));
 
@@ -341,7 +313,6 @@ exports.signPasswordRequest = async (req, res) => {
 
 
     /* Send request for SGX */
-
     axios
       .post('https://sgx.ternoa.com/deposit', {
         signature: u8aToHex(signature),

@@ -41,11 +41,7 @@ module.exports = function (app) {
   */
   app.post("/api/createNFT", controller.createNft);
 
-  /*
-  List NFT on marketplace
-  */
-  app.post("/api/listNFT", controller.listNft);
-
+ 
   /*
   Sell NFT to TERNOA Market Place
   */
