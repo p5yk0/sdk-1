@@ -1,10 +1,19 @@
 const express = require('express');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
-
+const empty = require('empty-folder');
+const app = express();
 require('dotenv').config();
 
-const app = express();
+/* clean Folder in case of dev purpose */
+const args = process.argv.slice(2)
+if (args[0] == "dev") {
+  empty('./zip', false, (o) => { });
+  empty('./nftkeys', false, (o) => { });
+  empty('./tosgx', false, (o) => { });
+  empty('./uploads', false, (o) => { });
+  empty('./txtkeys', false, (o) => { });
+}
 
 app.use(cors());
 app.use(express.json());
@@ -13,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(fileUpload());
 
 app.get('/', (req, res) => {
-    res.send('server is running');
+  res.send('server is running');
 });
 
 require("./app/routes/user.routes")(app);

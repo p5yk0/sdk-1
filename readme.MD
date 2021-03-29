@@ -105,4 +105,3 @@ curl --request POST \
 }'
 ```
 
-## MARKETPLACE

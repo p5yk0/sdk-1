@@ -51,4 +51,9 @@ module.exports = function (app) {
   Generate Signature and crypt for SGX enclave
   */
   app.post("/api/signPasswordRequest", controller.signPasswordRequest);
+
+  /*
+ Exemple SGX endoing
+  */
+  app.post("/api/sgxEnpoint", controller.sgxEnpoint);
 };

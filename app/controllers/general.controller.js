@@ -1,10 +1,14 @@
 //General libraries
 const fs = require('fs');
+const path = require('path');
 const { exit } = require('process');
 const openpgp = require("openpgp");
 var AdmZip = require('adm-zip');
 const axios = require('axios')
-
+const zlib = require('zlib');
+var unzipper = require('unzipper');
+const request = require('superagent');
+const admZip = require('adm-zip');
 //Polkadot libraries
 const { ApiPromise, WsProvider } = require('@polkadot/api');
 const { stringToU8a, u8aToHex } = require('@polkadot/util');
@@ -75,9 +79,22 @@ exports.generateKey = async (req, res) => {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   const hash = blake2AsHex(result);
-  res.setHeader('Content-Type', 'application/json');
+
+  /*generate pgp */
+  const { privateKeyArmored, publicKeyArmored, revocationCertificate } = await openpgp.generateKey({
+    type: 'ecc',
+    curve: 'curve25519',
+    userIds: [{ name: 'yourname', email: 'johndoe@ternoa.com' }],
+    passphrase: hash
+  });
+
+  /*Safe encrypted NFT keys*/
+  fs.writeFileSync('./keys/private.txt', privateKeyArmored);
+  fs.writeFileSync('./keys/public.txt', publicKeyArmored);
+  fs.writeFileSync('./keys/_revokekey.txt', revocationCertificate);
 
   /* Return random password */
+  res.setHeader('Content-Type', 'application/json');
   res.send(JSON.stringify(hash));
 
 };
@@ -204,7 +221,7 @@ exports.createNft = async (req, res) => {
     const api = await ApiPromise.create({ provider: wsProvider, types: spec });
     const unsub = await api.tx.nfts
       .create({
-        
+
         offchain_uri: nftUrl,
       })
       .signAndSend(user, async ({ events = [], status }) => {
@@ -297,24 +314,25 @@ exports.signPasswordRequest = async (req, res) => {
     var willSendthis = zip.toBuffer();
     zip.writeZip("./tosgx/" + hash + '.zip');
 
-    /* generate Hash of file*/
-    var hashZip = await getChecksum("./tosgx/" + hash + ".zip");
+    /* generate Hash of files of keys*/
+    var hashKey = await getChecksum("./tosgx/" + hash + ".text.ternoa");
+    console.log(nftId + '_' + hashKey + '_' + process.env.address);
+
 
     /* upload zip file to sia*/
     const skylink = await client.uploadFile("./tosgx/" + hash + ".zip");
-
     console.log(`https://siasky.net/${skylink.substring(6)}`);
 
     /* Generate signature  */
-    const message = stringToU8a(nftId + '_' + hashZip + '_' + process.env.address);
-    console.log(nftId + '_' + hashZip + '_' + process.env.address);
+    const message = stringToU8a(nftId + '_' + hashKey + '_' + process.env.address);
     const signature = user.sign(message);
     console.log(u8aToHex(signature));
+    res.send(JSON.stringify("ok"));
 
 
     /* Send request for SGX */
-    axios
-      .post('https://sgx.ternoa.com/deposit', {
+    /*axios
+      .post(process.env.endpoint, {
         signature: u8aToHex(signature),
         data: nftId + '_' + hashZip + '_' + process.env.address,
         zip: `https://siasky.net/${skylink.substring(6)}`
@@ -327,11 +345,65 @@ exports.signPasswordRequest = async (req, res) => {
       })
       .catch(error => {
         //to change when NGX deployed
-        res.send(JSON.stringify("ok"));
-      })
-
-
+        res.send(JSON.stringify("ko"));
+        console.log(error.errno);
+      })*/
   }
+
   main();
 }
 
+//Used for add/change signature
+exports.sgxEnpoint = async (req, res) => {
+
+  async function main() {
+    const { signature, data, zip, hash } = req.body;
+    const dataContent = data.split('_');
+
+    await cryptoWaitReady();
+
+    const isValidSignature = (
+      signedMessage, signature, address) => {
+      const publicKey = decodeAddress(address);
+      const hexPublicKey = u8aToHex(publicKey);
+
+      return signatureVerify(signedMessage, signature, hexPublicKey).isValid;
+    };
+
+    /* first check if signed content is real  */
+    const isValid = isValidSignature(data, signature, dataContent[2]);
+
+    if (isValid == true) {
+      /* check is owner is declared owner */
+      const wsProvider = new WsProvider(ENDPOINT);
+      const api = await ApiPromise.create({ provider: wsProvider, types: spec });
+      const nftData = await api.query.nfts.data(dataContent[0]);
+      const offchain_uri = Buffer.from(nftData.details.offchain_uri, 'hex');
+      
+      if (nftData.owner.toString() == dataContent[2]) {
+
+        /* Download zip and check the Hash*/
+        const zipFile = "./zip/" + dataContent[0] + ".zip";
+        const source = zip;
+
+        request
+          .get(source)
+          .on('error', function (error) {
+            console.log(error);
+          })
+          .pipe(fs.createWriteStream(zipFile))
+          .on('finish', async function () {
+            var zip = new admZip(zipFile);
+            zip.extractAllTo("./zip", true);
+            var hashZip = await getChecksum("./zip/" + hash + ".text.ternoa");
+            if (hashZip == dataContent[1]) {
+              /* Unzip with NGX Private Keys */ 
+            }
+          });
+
+        res.send(JSON.stringify("ok"));
+      }
+    }
+  }
+  main();
+}
