@@ -364,3 +364,25 @@ exports.signPasswordRequest = async (req, res) => {
   main();
 }
 
+exports.getNftById = async (req, res) => {
+
+  const { nftId } = req.body;
+
+  async function main() {
+
+    await cryptoWaitReady();
+
+    const wsProvider = new WsProvider(ENDPOINT);
+
+    const api = await ApiPromise.create({ provider: wsProvider, types: spec });
+    const nftData = await api.query.nfts.data(nftId);
+
+    // get uri
+    const offchain_uri = Buffer.from(nftData.details.offchain_uri, 'hex');
+
+  }
+
+  await main();
+
+};
+
