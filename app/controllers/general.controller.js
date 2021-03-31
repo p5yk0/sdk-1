@@ -227,7 +227,7 @@ exports.createNft = async (req, res) => {
       .signAndSend(user, async ({ events = [], status }) => {
 
 
-        if (status.isFinalized) {
+        if (status.isInBlock) {
           unsub();
           events.forEach(async ({ event: { data, method, section } }) => {
 
@@ -235,7 +235,6 @@ exports.createNft = async (req, res) => {
               const nftId = data[0].toString();
               res.send(nftId);
             }
-
           })
         }
 
@@ -261,10 +260,7 @@ exports.sellNFT = async (req, res) => {
     const wsProvider = new WsProvider(ENDPOINT);
     const api = await ApiPromise.create({ provider: wsProvider, types: spec });
     await api.tx.marketplace.list(Number(nftId), "1000000000000000000").signAndSend(user, async ({ events = [], status }) => {
-      events.forEach(async ({ event: { data, method, section } }) => {
-        res.send(JSON.stringify(data));
-
-      });
+      res.send(JSON.stringify("ok"));
     })
 
   }
