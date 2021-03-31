@@ -115,7 +115,7 @@ exports.uploadIM = async (req, res) => {
 };
 
 exports.cryptFile = async (req, res) => {
-
+  console.log(req);
   const file = req.files.file;
   file.mv('./uploads/' + file.name, async function (err, result) {
     if (err) { throw err; }
