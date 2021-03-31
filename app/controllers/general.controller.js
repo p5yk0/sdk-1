@@ -230,8 +230,11 @@ exports.createNft = async (req, res) => {
         if (status.isFinalized) {
           unsub();
           events.forEach(async ({ event: { data, method, section } }) => {
-            const nftId = data[0].toString();
-            res.send(nftId);
+
+            if (`${section}.${method}` === 'nfts.Created') {
+              const nftId = data[0].toString();
+              res.send(nftId);
+            }
 
           })
         }
@@ -379,7 +382,7 @@ exports.sgxEnpoint = async (req, res) => {
       const api = await ApiPromise.create({ provider: wsProvider, types: spec });
       const nftData = await api.query.nfts.data(dataContent[0]);
       const offchain_uri = Buffer.from(nftData.details.offchain_uri, 'hex');
-      
+
       if (nftData.owner.toString() == dataContent[2]) {
 
         /* Download zip and check the Hash*/
@@ -397,7 +400,7 @@ exports.sgxEnpoint = async (req, res) => {
             zip.extractAllTo("./zip", true);
             var hashZip = await getChecksum("./zip/" + hash + ".text.ternoa");
             if (hashZip == dataContent[1]) {
-              /* Unzip with NGX Private Keys */ 
+              /* Unzip with NGX Private Keys */
             }
           });
 
