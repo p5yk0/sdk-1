@@ -40,8 +40,8 @@ module.exports = function (app) {
   Upload NFT to TERNOA chain
   */
   app.post("/api/createNFT", controller.createNft);
+  app.post("/api/createNFTBatch", controller.createNftBatch);
 
- 
   /*
   Sell NFT to TERNOA Market Place
   */

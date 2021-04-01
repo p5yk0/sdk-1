@@ -245,6 +245,143 @@ exports.createNft = async (req, res) => {
 
 };
 
+exports.createNftBatch = async (req, res) => {
+
+  /*Method for create NFT using Mnemonic*/
+  //const { nftUrls } = req.body;
+  const nftUrls  = [
+      'https://siasky.net/_BFquQxd1zQNbu2lW3vvAcUxnyUHx8q_C0p_hL8M4mqEKQ',
+      'https://siasky.net/_Alpe7wzt9gLGmPn4ugTdhFf_Tf4zEMkVYgXa8hVc2qGyw',
+      'https://siasky.net/_AXanmnJQScy4mo0LSwk7bc-a6ABs-Go6JUdEWP-b0YlsA',
+  ];
+
+  const nftIds = [];
+
+  async function main() {
+    await cryptoWaitReady();
+
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 2 });
+    const user = keyring.addFromMnemonic((process.env.mnemonic));
+
+    const wsProvider = new WsProvider(ENDPOINT);
+    const api = await ApiPromise.create({ provider: wsProvider, types: spec });
+
+    // construct transaction to be batched
+    const transactionsToBeBatchedSent = nftUrls.map(nftUrl => {
+      return api.tx.nfts
+          .create({
+            offchain_uri: nftUrl,
+          })
+    });
+
+    // batch transactions
+    try {
+      // Time to trigger the tx
+      await api.tx.utility
+          .batch(transactionsToBeBatchedSent)
+          .signAndSend(user, ({ events = [], status }) => {
+            console.log('Transaction status:', status.type);
+
+            if (status.isRetracted) {
+              // If the transaction is retracted we set a timeout so that if
+              // the tx is not finalized in 5 minutes (300 s)  we cancel the job.
+              setTimeout(() => { process.exit(1) }, 300 * 1000);
+            } else if (status.isInBlock) {
+              blockHash = status.asInBlock.toHex();
+
+              console.log('Included at block hash', status.asInBlock.toHex());
+              console.log('Events:');
+
+              events.forEach(({ event: { data, method, section }, phase }) => {
+                console.log('\t', phase.toString(), `: ${section}.${method}`, data.toString());
+
+                if (`${section}.${method}` === 'utility.BatchCompleted') {
+                  console.log('All transactions succeeded!');
+                  // ok,  we can now list all nfts.
+                  listNfts();
+                } else if (`${section}.${method}` === 'utility.BatchInterrupted') {
+                  console.log('Transactions failed after call' +  `${data[0]}`);
+                  firstFailure = data[0];
+                }else if (`${section}.${method}` === 'nfts.Created') {
+                  const nftId = data[0].toString();
+                  nftIds.push(nftId);
+                }
+              });
+            } else if (status.isFinalized) {
+              console.log('Finalized block hash', status.asFinalized.toHex());
+              res.send("ok");
+            }
+          });
+    } catch (e) {
+      firstFailure = 0;
+    } finally {
+      // We wait for completion
+      console.info('BatchCompleted')
+    }
+  }
+
+  async function listNfts() {
+    await cryptoWaitReady();
+
+    const keyring = new Keyring({type: 'sr25519', ss58Format: 2});
+    const user = keyring.addFromMnemonic((process.env.mnemonic));
+
+    const wsProvider = new WsProvider(ENDPOINT);
+    const api = await ApiPromise.create({provider: wsProvider, types: spec});
+
+    // construct transaction to be batched
+    const transactionsToBeBatchedSent = nftIds.map(nftId => {
+      return api.tx.marketplace.list(Number(nftId), "1000000000000000000");
+    });
+
+    // batch transactions
+    try {
+      // Time to trigger the tx
+      await api.tx.utility
+          .batch(transactionsToBeBatchedSent)
+          .signAndSend(user, ({ events = [], status }) => {
+            console.log('Transaction status:', status.type);
+
+            if (status.isRetracted) {
+              // If the transaction is retracted we set a timeout so that if
+              // the tx is not finalized in 5 minutes (300 s)  we cancel the job.
+              setTimeout(() => { process.exit(1) }, 300 * 1000);
+            } else if (status.isInBlock) {
+              blockHash = status.asInBlock.toHex();
+
+              console.log('Included at block hash', status.asInBlock.toHex());
+              console.log('Events:');
+
+              events.forEach(({ event: { data, method, section }, phase }) => {
+                console.log('\t', phase.toString(), `: ${section}.${method}`, data.toString());
+
+                if (`${section}.${method}` === 'utility.BatchCompleted') {
+                  console.log('All Nfts listed!');
+                } else if (`${section}.${method}` === 'utility.BatchInterrupted') {
+                  console.log('Transactions failed after call' +  `${data[0]}`);
+                  firstFailure = data[0];
+                }
+              });
+            } else if (status.isFinalized) {
+              console.log('Finalized block hash', status.asFinalized.toHex());
+              res.send("ok");
+            }
+          });
+    } catch (e) {
+      firstFailure = 0;
+    } finally {
+      // We wait for completion
+      console.info('BatchCompleted')
+    }
+  }
+
+  main();
+
+
+};
+
+
+
 
 exports.sellNFT = async (req, res) => {
 
