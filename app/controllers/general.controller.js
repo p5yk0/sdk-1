@@ -248,13 +248,11 @@ exports.createNft = async (req, res) => {
 exports.createNftBatch = async (req, res) => {
 
   /*Method for create NFT using Mnemonic*/
-  //const { nftUrls } = req.body;
-  const nftUrls  = [
-      'https://siasky.net/_BFquQxd1zQNbu2lW3vvAcUxnyUHx8q_C0p_hL8M4mqEKQ',
-      'https://siasky.net/_Alpe7wzt9gLGmPn4ugTdhFf_Tf4zEMkVYgXa8hVc2qGyw',
-      'https://siasky.net/_AXanmnJQScy4mo0LSwk7bc-a6ABs-Go6JUdEWP-b0YlsA',
-  ];
+  const { nftUrls } = req.body;
 
+  console.log(nftUrls);
+  res.send("id");
+  
   const nftIds = [];
 
   async function main() {
@@ -309,7 +307,7 @@ exports.createNftBatch = async (req, res) => {
               });
             } else if (status.isFinalized) {
               console.log('Finalized block hash', status.asFinalized.toHex());
-              res.send("ok");
+              res.send(JSON.stringify("ok"));
             }
           });
     } catch (e) {
