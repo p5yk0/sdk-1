@@ -364,7 +364,7 @@ exports.createNftBatch = async (req, res) => {
               });
             } else if (status.isFinalized) {
               console.log('Finalized block hash', status.asFinalized.toHex());
-              res.send("ok");
+              res.send(JSON.stringify("ok"));
             }
           });
     } catch (e) {
