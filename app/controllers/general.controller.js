@@ -23,6 +23,11 @@ const client = new SkynetClient();
 const { spec } = require('../types')
 const ENDPOINT = 'wss://chaos.ternoa.com';
 
+//Local server to do local request
+const url = 'http://127.0.0.1/api';
+const port = 3000;
+
+
 //Crypto libraries
 const crypto = require('crypto');
 const algorithm = 'aes-256-cbc';
@@ -31,6 +36,8 @@ const password = '1234'
 const salt = crypto.randomBytes(32)
 const iv = crypto.randomBytes(16)
 const key = crypto.scryptSync(password, salt, keyLength);
+
+
 
 function getChecksum(path) {
   return new Promise(function (resolve, reject) {
@@ -252,7 +259,7 @@ exports.createNftBatch = async (req, res) => {
 
   console.log(nftUrls);
   res.send("id");
-  
+
   const nftIds = [];
 
   async function main() {
@@ -302,6 +309,28 @@ exports.createNftBatch = async (req, res) => {
                   firstFailure = data[0];
                 }else if (`${section}.${method}` === 'nfts.Created') {
                   const nftId = data[0].toString();
+                  // get the hash
+                  const hash = '';
+                  // generate keys.
+                  request
+                      .post(url+'/signPasswordRequest:'+port)
+                      .send(
+                          { nftId: nftId , hash: getChecksum(nftUrl) }
+                      ).then( (err, res) => {
+                        // send keys to enclave
+                        const signature  = ''
+                        const data  = ''
+                        const zip = ''
+                    request
+                        .post(url+'sgxEnpoint:'+port)
+                        .send({
+                          'signature': signature,
+                          'data': data,
+                          'zip': zip,
+                          'hash': hash,
+                        });
+                      })
+
                   nftIds.push(nftId);
                 }
               });
