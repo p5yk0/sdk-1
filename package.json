@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "server.js",
   "license": "MIT",
+  "type": "module",
   "dependencies": {
     "@nebulous/skynet": "^2.0.1",
     "@polkadot/api": "^4.1.1",
@@ -27,5 +28,8 @@
     "superagent": "^6.1.0",
     "unzipper": "^0.10.11",
     "zlib": "^1.0.5"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
   }
 }

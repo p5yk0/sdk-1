@@ -9,3 +9,5 @@ txtkeys/*
 tosgx/*
 private/*
 
+yarn.lock
+.idea
